@@ -12,6 +12,7 @@ export default function CryptoExchange() {
   const [btcAmount, setBtcAmount] = useState("");
   const [usdAmount, setUsdAmount] = useState("");
   const [success, setSuccess] = useState(false);
+  const [transactionError, setTransactionError] = useState<string | null>(null);
 
   const { rate, isLoading, error } = useRate();
 
@@ -23,6 +24,7 @@ export default function CryptoExchange() {
     setIsBuying(!isBuying);
     setBtcAmount("");
     setUsdAmount("");
+    setTransactionError(null);
   };
 
   const handleBtcAmountChange = (value: string) => {
@@ -52,14 +54,14 @@ export default function CryptoExchange() {
   };
 
   const handleConfirm = () => {
-    setSuccess(true);
+    setSuccess(true); // here we could also fail the transaction and set an error message
 
     // Reset success message after 5 seconds
     setTimeout(() => {
       setSuccess(false);
       setBtcAmount("");
       setUsdAmount("");
-    }, 5000);
+    }, 3000);
   };
 
   const isFormValid = () => {
@@ -110,6 +112,38 @@ export default function CryptoExchange() {
         </div>
       )}
 
+      {/* Error message */}
+      {transactionError && (
+        <div className="mb-6 p-4 bg-red-100 dark:bg-red-900 rounded-lg animate-fadeIn">
+          <div className="flex items-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 text-red-600 dark:text-red-300 mr-2 animate-swapRotate"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                clipRule="evenodd"
+              />
+            </svg>
+            <p className="font-medium text-red-600 dark:text-red-300">
+              Transaction Failed
+            </p>
+          </div>
+          <p className="mt-2 text-sm text-red-500 dark:text-red-400">
+            {transactionError}
+          </p>
+          <button
+            onClick={() => setTransactionError(null)}
+            className="mt-3 text-xs text-red-600 dark:text-red-300 hover:underline focus:outline-none cursor-pointer"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
       <div
         className={`space-y-4 transition-opacity duration-300 ${
           success ? "opacity-50" : "opacity-100"
@@ -121,17 +155,17 @@ export default function CryptoExchange() {
             value={usdAmount}
             currency="USD"
             onChange={handleUsdAmountChange}
-            readonly={!isBuying}
+            readonly={!isBuying || success}
           />
 
-          <SwapButton onSwap={handleSwap} />
+          <SwapButton onSwap={handleSwap} disabled={success} />
 
           <CurrencyInput
             label={isBuying ? "You Receive" : "You Spend"}
             value={btcAmount}
             currency="BTC"
             onChange={handleBtcAmountChange}
-            readonly={isBuying}
+            readonly={isBuying || success}
           />
         </div>
 
