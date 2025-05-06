@@ -3,6 +3,8 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --btc-orange: #f7931a;
+  --btc-blue: #0052cc;
 }
 
 @theme inline {
@@ -45,6 +47,16 @@ body {
   }
 }
 
+@keyframes bounce-subtle {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
 .animate-swapRotate {
   animation: swapRotate 0.5s ease-in-out forwards;
 }
@@ -53,14 +65,17 @@ body {
   animation: fadeIn 0.5s ease-out forwards;
 }
 
+.animate-bounce-subtle {
+  animation: bounce-subtle 3s ease-in-out infinite;
+}
+
+.text-btc-orange {
+  color: var(--btc-orange);
+}
+
 @media (max-width: 640px) {
   .container {
     padding-left: 1rem;
     padding-right: 1rem;
   }
-}
-
-:root {
-  --btc-orange: #f7931a;
-  --btc-blue: #0052cc;
 }
