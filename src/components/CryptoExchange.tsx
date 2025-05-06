@@ -13,6 +13,7 @@ export default function CryptoExchange() {
   const [usdAmount, setUsdAmount] = useState("");
   const [success, setSuccess] = useState(false);
   const [transactionError, setTransactionError] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const { rate, isLoading, error } = useRate();
 
@@ -56,12 +57,16 @@ export default function CryptoExchange() {
   const handleConfirm = () => {
     setSuccess(true); // here we could also fail the transaction and set an error message
 
-    // Reset success message after 5 seconds
+    // Reset success message after 2 seconds
     setTimeout(() => {
       setSuccess(false);
       setBtcAmount("");
       setUsdAmount("");
-    }, 3000);
+    }, 2000);
+  };
+
+  const handleProcessingChange = (processing: boolean) => {
+    setIsProcessing(processing);
   };
 
   const isFormValid = () => {
@@ -146,7 +151,7 @@ export default function CryptoExchange() {
 
       <div
         className={`space-y-4 transition-opacity duration-300 ${
-          success ? "opacity-50" : "opacity-100"
+          success || isProcessing ? "opacity-50" : "opacity-100"
         }`}
       >
         <div className="space-y-2">
@@ -155,22 +160,23 @@ export default function CryptoExchange() {
             value={usdAmount}
             currency="USD"
             onChange={handleUsdAmountChange}
-            readonly={!isBuying || success}
+            readonly={!isBuying || success || isProcessing}
           />
 
-          <SwapButton onSwap={handleSwap} disabled={success} />
+          <SwapButton onSwap={handleSwap} disabled={success || isProcessing} />
 
           <CurrencyInput
             label={isBuying ? "You Receive" : "You Spend"}
             value={btcAmount}
             currency="BTC"
             onChange={handleBtcAmountChange}
-            readonly={isBuying || success}
+            readonly={isBuying || success || isProcessing}
           />
         </div>
 
         <ConfirmButton
           onConfirm={handleConfirm}
+          onProcessingChange={handleProcessingChange}
           disabled={!isFormValid() || isLoading || success}
         />
       </div>

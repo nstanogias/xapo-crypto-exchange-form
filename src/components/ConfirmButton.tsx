@@ -4,11 +4,13 @@ import { useState } from "react";
 
 interface ConfirmButtonProps {
   onConfirm: () => void;
+  onProcessingChange?: (isProcessing: boolean) => void;
   disabled?: boolean;
 }
 
 export default function ConfirmButton({
   onConfirm,
+  onProcessingChange,
   disabled = false,
 }: ConfirmButtonProps) {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -18,10 +20,17 @@ export default function ConfirmButton({
 
     setIsProcessing(true);
 
-    // Simulate transaction processing
+    if (onProcessingChange) {
+      onProcessingChange(true);
+    }
+
     setTimeout(() => {
       onConfirm();
       setIsProcessing(false);
+
+      if (onProcessingChange) {
+        onProcessingChange(false);
+      }
     }, 1000);
   };
 
