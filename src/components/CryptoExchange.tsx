@@ -1,47 +1,23 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import CurrencyInput from "./CurrencyInput";
 import SwapButton from "./SwapButton";
 import ExchangeRate from "./ExchangeRate";
 import ConfirmButton from "./ConfirmButton";
+import { useRate } from "@/hooks/useRate";
 
 export default function CryptoExchange() {
   const [isBuying, setIsBuying] = useState(true);
   const [btcAmount, setBtcAmount] = useState("");
   const [usdAmount, setUsdAmount] = useState("");
-  const [rate, setRate] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
   const [success, setSuccess] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
 
-  // Fetch exchange rate from CoinGecko API
-  useEffect(() => {
-    const fetchRate = async () => {
-      try {
-        setIsLoading(true);
-        const response = await fetch(
-          "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd"
-        );
-        const data = await response.json();
-        setRate(data.bitcoin.usd);
-        setErrorMessage("");
-      } catch (error) {
-        console.error("Error fetching exchange rate:", error);
-        setRate(40000);
-        setErrorMessage("Failed to fetch latest rate. Using estimated rate.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const { rate, isLoading, error } = useRate();
 
-    fetchRate();
-
-    // Refresh rate every 60 seconds
-    const intervalId = setInterval(fetchRate, 60000);
-
-    return () => clearInterval(intervalId);
-  }, []);
+  const errorMessage = error
+    ? "Failed to fetch latest rate. Using estimated rate."
+    : "";
 
   const handleSwap = () => {
     setIsBuying(!isBuying);
