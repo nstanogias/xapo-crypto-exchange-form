@@ -6,12 +6,14 @@ interface ConfirmButtonProps {
   onConfirm: () => void;
   onProcessingChange?: (isProcessing: boolean) => void;
   disabled?: boolean;
+  actionText?: string;
 }
 
 export default function ConfirmButton({
   onConfirm,
   onProcessingChange,
   disabled = false,
+  actionText = "Confirm Swap",
 }: ConfirmButtonProps) {
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -77,7 +79,7 @@ export default function ConfirmButton({
             Processing...
           </>
         ) : (
-          "Confirm Swap"
+          actionText
         )}
       </div>
     </button>

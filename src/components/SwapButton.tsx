@@ -31,17 +31,18 @@ export default function SwapButton({
         transition-all duration-300 ease-in-out
         focus:outline-none focus:ring-2 focus:ring-blue-300
         flex items-center justify-center
+        ${isAnimating ? "animate-swapRotate" : ""}
         ${
           disabled
             ? "bg-gray-400 cursor-not-allowed"
-            : "bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 hover:shadow-lg transform hover:scale-110 cursor-pointer"
+            : "bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 hover:shadow-lg transform hover:scale-110 cursor-pointer animate-button-glow"
         }
       `}
       aria-label="Swap currencies"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        className={`h-6 w-6 ${isAnimating ? "animate-swapRotate" : ""}`}
+        className="h-6 w-6"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"

@@ -6,14 +6,15 @@ import SwapButton from "./SwapButton";
 import ExchangeRate from "./ExchangeRate";
 import ConfirmButton from "./ConfirmButton";
 import { useRate } from "@/hooks/useRate";
+import BitcoinIcon from "./BitcoinIcon";
 
 export default function CryptoExchange() {
-  const [isBuying, setIsBuying] = useState(true);
   const [btcAmount, setBtcAmount] = useState("");
   const [usdAmount, setUsdAmount] = useState("");
+  const [activeField, setActiveField] = useState<"btc" | "usd" | null>(null);
   const [success, setSuccess] = useState(false);
-  const [transactionError, setTransactionError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isSwapped, setIsSwapped] = useState(false);
 
   const { rate, isLoading, error } = useRate();
 
@@ -22,47 +23,100 @@ export default function CryptoExchange() {
     : "";
 
   const handleSwap = () => {
-    setIsBuying(!isBuying);
-    setBtcAmount("");
-    setUsdAmount("");
-    setTransactionError(null);
+    const tempBtc = btcAmount;
+    const tempUsd = usdAmount;
+
+    if (tempBtc || tempUsd) {
+      setBtcAmount(tempUsd);
+      setUsdAmount(tempBtc);
+      setActiveField(activeField === "btc" ? "usd" : "btc");
+      setIsSwapped(!isSwapped);
+    }
+  };
+
+  const formatUsdValue = (value: number): string => {
+    if (isNaN(value)) return "";
+    // Prevent scientific notation for large numbers
+    if (value > 1e9) return "999,999,999.99";
+    return value
+      .toLocaleString("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })
+      .replace(/,/g, "");
+  };
+
+  const formatBtcValue = (value: number): string => {
+    if (isNaN(value)) return "";
+    // Prevent scientific notation for small numbers
+    if (value < 1e-8) return "0.00000000";
+    if (value > 999999999.99 / rate) return (999999999.99 / rate).toFixed(8);
+    return value
+      .toLocaleString("en-US", {
+        minimumFractionDigits: 8,
+        maximumFractionDigits: 8,
+      })
+      .replace(/,/g, "");
   };
 
   const handleBtcAmountChange = (value: string) => {
     setBtcAmount(value);
-    if (value === "") {
+    setActiveField("btc");
+
+    if (!value) {
       setUsdAmount("");
       return;
     }
 
-    const btc = parseFloat(value);
-    if (!isNaN(btc)) {
-      setUsdAmount((btc * rate).toFixed(2));
+    const amount = parseFloat(value);
+    if (!isNaN(amount)) {
+      if (isSwapped) {
+        const btcValue = amount / rate;
+        setUsdAmount(formatBtcValue(btcValue));
+      } else {
+        const usdValue = amount * rate;
+        setUsdAmount(formatUsdValue(usdValue));
+      }
     }
   };
 
   const handleUsdAmountChange = (value: string) => {
     setUsdAmount(value);
-    if (value === "") {
+    setActiveField("usd");
+
+    if (!value) {
       setBtcAmount("");
       return;
     }
 
-    const usd = parseFloat(value);
-    if (!isNaN(usd)) {
-      setBtcAmount((usd / rate).toFixed(8));
+    const amount = parseFloat(value);
+    if (!isNaN(amount)) {
+      if (isSwapped) {
+        const usdValue = amount * rate;
+        setBtcAmount(formatUsdValue(usdValue));
+      } else {
+        const btcValue = amount / rate;
+        setBtcAmount(formatBtcValue(btcValue));
+      }
     }
   };
 
   const handleConfirm = () => {
-    setSuccess(true); // here we could also fail the transaction and set an error message
+    setSuccess(false);
 
-    // Reset success message after 2 seconds
+    // Simulate API call
     setTimeout(() => {
-      setSuccess(false);
-      setBtcAmount("");
-      setUsdAmount("");
-    }, 2000);
+      setSuccess(true);
+      setIsProcessing(false);
+
+      // Reset form after success display
+      setTimeout(() => {
+        setSuccess(false);
+        setBtcAmount("");
+        setUsdAmount("");
+        setActiveField(null);
+      }, 3000);
+    }, 1000);
   };
 
   const handleProcessingChange = (processing: boolean) => {
@@ -76,76 +130,57 @@ export default function CryptoExchange() {
     return !isNaN(btc) && btc > 0 && !isNaN(usd) && usd > 0;
   };
 
+  const isBuying =
+    activeField === "usd" || (!activeField && !btcAmount && !usdAmount);
+
   return (
-    <div className="max-w-md w-full mx-auto p-6 bg-white dark:bg-gray-900 rounded-2xl shadow-xl transition-all duration-300">
+    <div className="max-w-md w-full mx-auto p-6 bg-white dark:bg-gray-900 rounded-2xl shadow-xl transition-all duration-300 card-hover animate-slideIn animate-rotate-border">
       <div className="text-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
-          {isBuying ? "Buy Bitcoin" : "Sell Bitcoin"}
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-white flex items-center justify-center animate-pulse">
+          <BitcoinIcon className="inline-block mr-2 text-btc-orange" />
+          <span>{isBuying ? "Buy Bitcoin" : "Sell Bitcoin"}</span>
         </h1>
-        <p className="text-gray-600 dark:text-gray-300 mt-1">
-          {isBuying ? "Spend USD to get BTC" : "Sell BTC to get USD"}
-        </p>
       </div>
 
       <ExchangeRate rate={rate} isLoading={isLoading} />
 
       {errorMessage && (
-        <div className="mb-4 p-2 bg-yellow-100 dark:bg-yellow-800 text-yellow-800 dark:text-yellow-200 text-sm rounded">
+        <div className="mb-4 p-2 bg-yellow-100 dark:bg-yellow-800 text-yellow-800 dark:text-yellow-200 text-sm rounded animate-slideIn">
           {errorMessage}
         </div>
       )}
 
       {success && (
-        <div className="mb-6 p-4 bg-green-100 dark:bg-green-800 rounded-lg animate-fadeIn">
+        <div className="mb-6 p-4 bg-green-100 dark:bg-green-800 rounded-lg animate-slideIn">
           <div className="flex items-center">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 text-green-600 dark:text-green-300 mr-2 animate-bounce"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                fillRule="evenodd"
-                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                clipRule="evenodd"
-              />
-            </svg>
+            <div className="rounded-full bg-green-500 p-1 mr-2 animate-checkmark">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 text-white"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </div>
             <p className="font-medium text-green-600 dark:text-green-300">
               Swap successful! Your transaction has been processed.
             </p>
           </div>
-        </div>
-      )}
-
-      {/* Error message */}
-      {transactionError && (
-        <div className="mb-6 p-4 bg-red-100 dark:bg-red-900 rounded-lg animate-fadeIn">
-          <div className="flex items-center">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 text-red-600 dark:text-red-300 mr-2 animate-swapRotate"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                fillRule="evenodd"
-                d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                clipRule="evenodd"
-              />
-            </svg>
-            <p className="font-medium text-red-600 dark:text-red-300">
-              Transaction Failed
+          <div className="mt-2 text-sm text-green-600 dark:text-green-300">
+            <p>
+              <span className="font-medium">Amount:</span>{" "}
+              {isBuying ? `${btcAmount} BTC` : `${usdAmount} USD`}
+            </p>
+            <p>
+              <span className="font-medium">Rate:</span> $
+              {rate.toLocaleString()} per BTC
             </p>
           </div>
-          <p className="mt-2 text-sm text-red-500 dark:text-red-400">
-            {transactionError}
-          </p>
-          <button
-            onClick={() => setTransactionError(null)}
-            className="mt-3 text-xs text-red-600 dark:text-red-300 hover:underline focus:outline-none cursor-pointer"
-          >
-            Dismiss
-          </button>
         </div>
       )}
 
@@ -156,29 +191,46 @@ export default function CryptoExchange() {
       >
         <div className="space-y-2">
           <CurrencyInput
-            label={isBuying ? "You Spend" : "You Receive"}
-            value={usdAmount}
-            currency="USD"
-            onChange={handleUsdAmountChange}
-            readonly={!isBuying || success || isProcessing}
+            label="You Send"
+            value={btcAmount}
+            currency={isSwapped ? "USD" : "BTC"}
+            onChange={handleBtcAmountChange}
+            readonly={success || isProcessing}
+            active={activeField === "btc"}
+            maxDecimals={isSwapped ? 2 : 8}
+            hint="Enter the amount of BTC to exchange"
           />
 
-          <SwapButton onSwap={handleSwap} disabled={success || isProcessing} />
+          <div className="relative z-10">
+            <div className="absolute left-1/2 transform -translate-x-1/2 -mt-4">
+              <SwapButton
+                onSwap={handleSwap}
+                disabled={success || isProcessing || (!btcAmount && !usdAmount)}
+              />
+            </div>
+            <div className="border-t border-gray-200 dark:border-gray-700 my-4"></div>
+          </div>
 
           <CurrencyInput
-            label={isBuying ? "You Receive" : "You Spend"}
-            value={btcAmount}
-            currency="BTC"
-            onChange={handleBtcAmountChange}
-            readonly={isBuying || success || isProcessing}
+            label="You Receive"
+            value={usdAmount}
+            currency={isSwapped ? "BTC" : "USD"}
+            onChange={handleUsdAmountChange}
+            readonly={success || isProcessing}
+            active={activeField === "usd"}
+            maxDecimals={isSwapped ? 8 : 2}
+            hint="Enter the amount of USD to exchange"
           />
         </div>
 
-        <ConfirmButton
-          onConfirm={handleConfirm}
-          onProcessingChange={handleProcessingChange}
-          disabled={!isFormValid() || isLoading || success}
-        />
+        <div className="mt-6">
+          <ConfirmButton
+            onConfirm={handleConfirm}
+            onProcessingChange={handleProcessingChange}
+            disabled={!isFormValid() || isLoading || success}
+            actionText={isBuying ? "Buy Bitcoin" : "Sell Bitcoin"}
+          />
+        </div>
       </div>
     </div>
   );

@@ -1,6 +1,10 @@
-const BitcoinIcon = () => {
+interface BitcoinIconProps {
+  className?: string;
+}
+
+const BitcoinIcon = ({ className = "" }: BitcoinIconProps) => {
   return (
-    <span className="inline-block align-middle mr-2">
+    <span className={`inline-block align-middle mr-2 ${className}`}>
       <svg
         width="24"
         height="24"

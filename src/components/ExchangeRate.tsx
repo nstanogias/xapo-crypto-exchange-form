@@ -32,7 +32,7 @@ export default function ExchangeRate({
         flex items-center mt-1 px-4 py-2 rounded-md
         bg-gray-50 dark:bg-gray-800 
         transition-all duration-500 ease-in-out
-        ${highlight ? "bg-yellow-100 dark:bg-yellow-900" : ""}
+        ${highlight ? "bg-yellow-100 dark:bg-yellow-900 animate-pulse" : ""}
       `}
       >
         {isLoading ? (
@@ -41,7 +41,7 @@ export default function ExchangeRate({
             <span>Loading rate...</span>
           </div>
         ) : (
-          <span className="font-medium">
+          <span className="font-medium animate-fadeIn">
             1 BTC = $
             {rate.toLocaleString("en-US", {
               minimumFractionDigits: 2,
