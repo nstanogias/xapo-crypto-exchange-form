@@ -102,21 +102,17 @@ export default function CryptoExchange() {
   };
 
   const handleConfirm = () => {
-    setSuccess(false);
-
     // Simulate API call
-    setTimeout(() => {
-      setSuccess(true);
-      setIsProcessing(false);
+    setSuccess(true);
+    setIsProcessing(false);
 
-      // Reset form after success display
-      setTimeout(() => {
-        setSuccess(false);
-        setBtcAmount("");
-        setUsdAmount("");
-        setActiveField(null);
-      }, 3000);
-    }, 1000);
+    // Reset form after success display
+    setTimeout(() => {
+      setSuccess(false);
+      setBtcAmount("");
+      setUsdAmount("");
+      setActiveField(null);
+    }, 3000);
   };
 
   const handleProcessingChange = (processing: boolean) => {
