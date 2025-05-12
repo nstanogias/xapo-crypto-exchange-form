@@ -20,7 +20,7 @@ test.describe("Crypto Exchange", () => {
     const usdInput = page.getByLabel("You Receive", { exact: true });
 
     await btcInput.fill("1");
-    await expect(usdInput).toHaveValue(/^\d+\.\d{2}$/);
+    await expect(usdInput).toHaveValue("40,000.00");
   });
 
   test("should allow entering USD amount and calculate BTC", async ({

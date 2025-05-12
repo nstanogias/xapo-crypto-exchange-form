@@ -34,30 +34,42 @@ export default function CryptoExchange() {
 
   const formatUsdValue = (value: number): string => {
     if (isNaN(value)) return "";
-    // Prevent scientific notation for large numbers
-    if (value > 1e9) return "999,999,999.99";
-    return value
-      .toLocaleString("en-US", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      })
-      .replace(/,/g, "");
+    // Cap value at 1 billion
+    if (value > 1000000000) return "1,000,000,000.00";
+    return value.toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
   };
 
   const formatBtcValue = (value: number): string => {
     if (isNaN(value)) return "";
     // Prevent scientific notation for small numbers
     if (value < 1e-8) return "0.00000000";
-    if (value > 999999999.99 / rate) return (999999999.99 / rate).toFixed(8);
-    return value
-      .toLocaleString("en-US", {
+    // Cap BTC value based on max USD value
+    const maxBtcValue = 1000000000 / rate;
+    if (value > maxBtcValue)
+      return maxBtcValue.toLocaleString("en-US", {
         minimumFractionDigits: 8,
         maximumFractionDigits: 8,
-      })
-      .replace(/,/g, "");
+      });
+    return value.toLocaleString("en-US", {
+      minimumFractionDigits: 8,
+      maximumFractionDigits: 8,
+    });
   };
 
   const handleBtcAmountChange = (value: string) => {
+    // Check if adding this character would exceed the USD limit
+    const amount = parseFloat(value);
+    if (!isNaN(amount)) {
+      const usdValue = isSwapped ? amount / rate : amount * rate;
+      if (usdValue > 1000000000) {
+        // If exceeding, don't update the BTC amount
+        return;
+      }
+    }
+
     setBtcAmount(value);
 
     if (!value) {
@@ -65,7 +77,6 @@ export default function CryptoExchange() {
       return;
     }
 
-    const amount = parseFloat(value);
     if (!isNaN(amount)) {
       if (isSwapped) {
         const btcValue = amount / rate;
@@ -78,6 +89,12 @@ export default function CryptoExchange() {
   };
 
   const handleUsdAmountChange = (value: string) => {
+    // Directly prevent values over 1 billion
+    const amount = parseFloat(value);
+    if (!isNaN(amount) && amount > 1000000000) {
+      return;
+    }
+
     setUsdAmount(value);
 
     if (!value) {
@@ -85,11 +102,12 @@ export default function CryptoExchange() {
       return;
     }
 
-    const amount = parseFloat(value);
     if (!isNaN(amount)) {
       if (isSwapped) {
         const usdValue = amount * rate;
-        setBtcAmount(formatUsdValue(usdValue));
+        // Cap at the max value
+        const cappedUsdValue = Math.min(usdValue, 1000000000);
+        setBtcAmount(formatUsdValue(cappedUsdValue));
       } else {
         const btcValue = amount / rate;
         setBtcAmount(formatBtcValue(btcValue));
