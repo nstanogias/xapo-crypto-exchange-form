@@ -107,7 +107,7 @@ export default function CryptoExchange() {
       setSuccess(false);
       setBtcAmount("");
       setUsdAmount("");
-      setActiveField(null);
+      setActiveField("btc");
     }, 3000);
   };
 
