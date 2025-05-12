@@ -8,7 +8,7 @@ test.describe("Crypto Exchange", () => {
   test("should display the exchange interface", async ({ page }) => {
     await expect(page.getByText("BTC ⟷ USD Exchange")).toBeVisible();
     await expect(
-      page.getByRole("heading", { name: "Buy Bitcoin" })
+      page.getByRole("heading", { name: "Sell Bitcoin" })
     ).toBeVisible();
     await expect(page.getByText("Current Exchange Rate")).toBeVisible();
   });

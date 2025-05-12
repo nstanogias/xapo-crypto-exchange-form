@@ -11,7 +11,7 @@ import BitcoinIcon from "./BitcoinIcon";
 export default function CryptoExchange() {
   const [btcAmount, setBtcAmount] = useState("");
   const [usdAmount, setUsdAmount] = useState("");
-  const [activeField, setActiveField] = useState<"btc" | "usd" | null>(null);
+  const [activeField, setActiveField] = useState<"btc" | "usd" | null>("btc");
   const [success, setSuccess] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSwapped, setIsSwapped] = useState(false);
@@ -26,12 +26,10 @@ export default function CryptoExchange() {
     const tempBtc = btcAmount;
     const tempUsd = usdAmount;
 
-    if (tempBtc || tempUsd) {
-      setBtcAmount(tempUsd);
-      setUsdAmount(tempBtc);
-      setActiveField(activeField === "btc" ? "usd" : "btc");
-      setIsSwapped(!isSwapped);
-    }
+    setBtcAmount(tempUsd);
+    setUsdAmount(tempBtc);
+    setActiveField(activeField === "btc" ? "usd" : "btc");
+    setIsSwapped(!isSwapped);
   };
 
   const formatUsdValue = (value: number): string => {
@@ -61,7 +59,6 @@ export default function CryptoExchange() {
 
   const handleBtcAmountChange = (value: string) => {
     setBtcAmount(value);
-    // setActiveField("btc");
 
     if (!value) {
       setUsdAmount("");
@@ -82,7 +79,6 @@ export default function CryptoExchange() {
 
   const handleUsdAmountChange = (value: string) => {
     setUsdAmount(value);
-    // setActiveField("usd");
 
     if (!value) {
       setBtcAmount("");
@@ -200,7 +196,7 @@ export default function CryptoExchange() {
             <div className="absolute left-1/2 transform -translate-x-1/2 -mt-4">
               <SwapButton
                 onSwap={handleSwap}
-                disabled={success || isProcessing || (!btcAmount && !usdAmount)}
+                disabled={success || isProcessing}
               />
             </div>
             <div className="border-t border-gray-200 dark:border-gray-700 my-4"></div>
