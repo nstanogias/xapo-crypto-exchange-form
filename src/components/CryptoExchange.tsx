@@ -61,7 +61,7 @@ export default function CryptoExchange() {
 
   const handleBtcAmountChange = (value: string) => {
     setBtcAmount(value);
-    setActiveField("btc");
+    // setActiveField("btc");
 
     if (!value) {
       setUsdAmount("");
@@ -82,7 +82,7 @@ export default function CryptoExchange() {
 
   const handleUsdAmountChange = (value: string) => {
     setUsdAmount(value);
-    setActiveField("usd");
+    // setActiveField("usd");
 
     if (!value) {
       setBtcAmount("");
@@ -192,7 +192,6 @@ export default function CryptoExchange() {
             currency={isSwapped ? "USD" : "BTC"}
             onChange={handleBtcAmountChange}
             readonly={success || isProcessing}
-            active={activeField === "btc"}
             maxDecimals={isSwapped ? 2 : 8}
             hint="Enter the amount of BTC to exchange"
           />
@@ -213,7 +212,6 @@ export default function CryptoExchange() {
             currency={isSwapped ? "BTC" : "USD"}
             onChange={handleUsdAmountChange}
             readonly={success || isProcessing}
-            active={activeField === "usd"}
             maxDecimals={isSwapped ? 8 : 2}
             hint="Enter the amount of USD to exchange"
           />

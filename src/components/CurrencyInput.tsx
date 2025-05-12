@@ -8,7 +8,7 @@ interface CurrencyInputProps {
   currency: string;
   onChange: (value: string) => void;
   readonly?: boolean;
-  active?: boolean;
+  // active?: boolean;
   maxDecimals?: number;
   hint?: string;
 }
@@ -19,7 +19,7 @@ export default function CurrencyInput({
   currency,
   onChange,
   readonly = false,
-  active = false,
+  // active = false,
   maxDecimals = 2,
   hint,
 }: CurrencyInputProps) {
@@ -40,8 +40,8 @@ export default function CurrencyInput({
 
   return (
     <div
-      className={`w-full transition-all duration-300 ${
-        active ? "animate-shimmer" : ""
+      className={`w-full transition-all duration-300 
+      
       }`}
     >
       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
